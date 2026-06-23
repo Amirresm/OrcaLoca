@@ -1,0 +1,11 @@
+.git
+data/
+log*/
+output*/
+*.egg-info/
+__pycache__/
+.mypy_cache/
+dist/
+build/
+*.png
+key.cfg

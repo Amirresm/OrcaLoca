@@ -66,6 +66,20 @@ def get_llm(**kwargs) -> LLM:
     elif model.startswith("gpt"):
         kwargs["api_key"] = orcar_config["OPENAI_API_KEY"]
         LLM_func = OpenAI
+    elif orcar_config["OPENAI_API_BASE_URL"]:
+        # Self-hosted OpenAI-compatible endpoint (e.g. vLLM). Routed here for any
+        # model name that is not claude/gpt/gemini as long as a base URL is set.
+        from llama_index.llms.openai_like import OpenAILike
+
+        kwargs["api_key"] = orcar_config["OPENAI_API_KEY"]
+        kwargs["api_base"] = orcar_config["OPENAI_API_BASE_URL"]
+        kwargs["is_chat_model"] = True
+        kwargs["is_function_calling_model"] = True
+        try:
+            kwargs["context_window"] = int(orcar_config["VLLM_CONTEXT_WINDOW"])
+        except (KeyError, ValueError):
+            pass
+        LLM_func = OpenAILike
     elif model.startswith("gemini"):
         # Load Google Cloud credentials
         service_account_path = orcar_config["VERTEX_SERVICE_ACCOUNT_PATH"]

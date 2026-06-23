@@ -91,13 +91,19 @@ def parse_inputs() -> argparse.Namespace:
         default=default_args_dict["cfg_path"],
         help=f"The cfg path",
     )
-    args = parser.parse_args()
-    # Conver args.instance_ids to args.filter_instance
-    args.filter_instance = (
-        default_args_dict["filter_instance"]
-        if not hasattr(args, "instance_ids") or args.instance_ids is None
-        else "^(" + "|".join(args.instance_ids) + ")$"
+    parser.add_argument(
+        "-fi",
+        "--filter_instance",
+        default=None,
+        help="Regex of instance_ids to run (e.g. '.*' for the full split). "
+        "Overridden by --instance_ids when given.",
     )
+    args = parser.parse_args()
+    # Precedence: --instance_ids > --filter_instance > default single instance
+    if args.instance_ids:
+        args.filter_instance = "^(" + "|".join(args.instance_ids) + ")$"
+    elif not args.filter_instance:
+        args.filter_instance = default_args_dict["filter_instance"]
     return args
 
 
