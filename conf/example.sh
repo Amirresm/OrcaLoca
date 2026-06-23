@@ -1,14 +1,22 @@
 #!/usr/bin/env bash
 # OrcaLoca run configuration.
 #
-# Inside the container, copy this to the mounted data volume and edit it there so
-# your changes persist across `docker run`s:
+# Inside the container, copy this into THIS IMAGE's data dir ($ORCA_DATA, which
+# lives under the shared /data mount) and edit it there so it persists:
 #
-#     cp conf/example.sh data/conf.sh
-#     vim data/conf.sh
-#     ./run-smoke.sh        # auto-sources data/conf.sh if present
+#     cp conf/example.sh "$ORCA_DATA/conf.sh"
+#     vim "$ORCA_DATA/conf.sh"
+#     ./run-smoke.sh        # auto-sources $ORCA_DATA/conf.sh if present
 #
-# run-*.sh source ${ORCA_CONF:-data/conf.sh}, falling back to conf/example.sh.
+# run-*.sh source ${ORCA_CONF:-$ORCA_DATA/conf.sh}, falling back to this template.
+# $ORCA_DATA is baked per-image (ENV in the Dockerfile, e.g. /data/orcaloca).
+
+# ---- Data dir -------------------------------------------------------------
+# Where this run's conf/logs/outputs live, under the shared /data mount.
+# Setting it here overrides the image's baked-in ENV. The ${ORCA_DATA:-...}
+# form keeps a -e ORCA_DATA=... runtime override working; drop the :- part and
+# hardcode a path if you want this file to always win.
+export ORCA_DATA="${ORCA_DATA:-/data/orcaloca}"
 
 # ---- LLM: self-hosted vLLM (OpenAI-compatible) ----------------------------
 # Model name stays constant; you change HOST:PORT per model you serve.
@@ -33,5 +41,10 @@ export FILTER_INSTANCE=".*"
 export CONTAINER_NAME="orcar_swe_bench_run_ctr"
 export MAX_RETRY="2"
 
-# ---- Caches: keep big HF dataset downloads in the mounted data volume -----
-export HF_HOME="/app/data/hf_cache"
+# ---- Caches ---------------------------------------------------------------
+# HF dataset is identical across models, so share it at the /data root to avoid
+# re-downloading per image. Scope it per-image instead with "$ORCA_DATA/hf_cache".
+export HF_HOME="/data/hf_cache"
+
+# Logs (./log*) and outputs (./output/) are written into $ORCA_DATA automatically
+# because run-*.sh cd into it before launching.
