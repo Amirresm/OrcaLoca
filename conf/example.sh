@@ -19,9 +19,10 @@
 # Model name stays constant; you change HOST:PORT per model you serve.
 # vLLM must be started so this model name is what --served-model-name reports.
 export MODEL="generic-vllm"
-export OPENAI_API_BASE_URL="http://localhost:8001/v1"   # <-- change port per model
+export OPENAI_API_BASE_URL="http://localhost:11888/v1"   # <-- change port per model
 export OPENAI_API_KEY="dummy"                            # vLLM ignores this unless started with --api-key
 export VLLM_CONTEXT_WINDOW="32768"                       # your model's max context length
+export LLM_TIMEOUT="6000"                                # per-request timeout (s); raise for slow models
 
 # tiktoken can't map a custom model name to a tokenizer, so token counts use this
 # encoding as a fallback (approximate vs. your model's real tokenizer). cl100k_base

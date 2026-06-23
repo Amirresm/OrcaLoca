@@ -67,8 +67,6 @@ def get_llm(**kwargs) -> LLM:
         kwargs["api_key"] = orcar_config["OPENAI_API_KEY"]
         LLM_func = OpenAI
     elif orcar_config["OPENAI_API_BASE_URL"]:
-        # Self-hosted OpenAI-compatible endpoint (e.g. vLLM). Routed here for any
-        # model name that is not claude/gpt/gemini as long as a base URL is set.
         from llama_index.llms.openai_like import OpenAILike
 
         kwargs["api_key"] = orcar_config["OPENAI_API_KEY"]
@@ -79,6 +77,19 @@ def get_llm(**kwargs) -> LLM:
             kwargs["context_window"] = int(orcar_config["VLLM_CONTEXT_WINDOW"])
         except (KeyError, ValueError):
             pass
+        try:
+            kwargs["timeout"] = float(orcar_config["LLM_TIMEOUT"])
+        except (KeyError, ValueError):
+            kwargs["timeout"] = 600.0
+        import httpx
+
+        _http_timeout = httpx.Timeout(kwargs["timeout"])
+        kwargs["http_client"] = httpx.Client(timeout=_http_timeout)
+        kwargs["async_http_client"] = httpx.AsyncClient(timeout=_http_timeout)
+        kwargs["temperature"] = 0.0
+        kwargs["additional_kwargs"] = {
+            "extra_body": {"chat_template_kwargs": {"enable_thinking": False}}
+        }
         LLM_func = OpenAILike
     elif model.startswith("gemini"):
         # Load Google Cloud credentials
