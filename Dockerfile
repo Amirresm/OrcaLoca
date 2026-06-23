@@ -20,10 +20,7 @@ COPY . /app
 # a newer core that drops llama_index.core.agent.runner -> ModuleNotFoundError.
 RUN pip install --no-cache-dir -e .
 
-# Per-image data dir. Mount the SAME host /data into every container; each image
-# scopes itself to /data/<DATA_SUBDIR>. Override at build with:
-#   docker build --build-arg DATA_SUBDIR=qwen-32b -t orcaloca:qwen .
-ARG DATA_SUBDIR=orcaloca
-ENV ORCA_DATA=/data/${DATA_SUBDIR}
-
+# No data dir is baked in: this image is reused across experiments. Mount the
+# shared host /data (-v /data:/data) and pick the experiment INSIDE the container
+# via `./setup.sh <exp>` + `./run-smoke.sh <exp>` (sets ORCA_DATA=/data/<exp>).
 CMD ["/bin/bash"]

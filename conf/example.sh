@@ -11,12 +11,9 @@
 # run-*.sh source ${ORCA_CONF:-$ORCA_DATA/conf.sh}, falling back to this template.
 # $ORCA_DATA is baked per-image (ENV in the Dockerfile, e.g. /data/orcaloca).
 
-# ---- Data dir -------------------------------------------------------------
-# Where this run's conf/logs/outputs live, under the shared /data mount.
-# Setting it here overrides the image's baked-in ENV. The ${ORCA_DATA:-...}
-# form keeps a -e ORCA_DATA=... runtime override working; drop the :- part and
-# hardcode a path if you want this file to always win.
-export ORCA_DATA="${ORCA_DATA:-/data/orcaloca}"
+# NOTE: the data dir ($ORCA_DATA) is NOT set here — it's chosen at runtime
+# (./setup.sh <exp> / ./run-smoke.sh <exp>), which is also how this very file's
+# location is found. Setting it here would be too late to matter.
 
 # ---- LLM: self-hosted vLLM (OpenAI-compatible) ----------------------------
 # Model name stays constant; you change HOST:PORT per model you serve.

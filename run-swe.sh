@@ -1,8 +1,16 @@
 #!/usr/bin/env bash
-# Full run: run OrcaLoca across the dataset (FILTER_INSTANCE, default '.*').
+# Full run across the dataset (FILTER_INSTANCE, default '.*').
+# Usage: ./run-swe.sh [experiment]   (experiment -> /data/<experiment>)
+#   or set ORCA_DATA beforehand and call with no arg.
+if [ -n "${1:-}" ]; then
+    case "$1" in
+        /*) export ORCA_DATA="$1" ;;
+        *)  export ORCA_DATA="/data/$1" ;;
+    esac
+fi
 source "$(dirname "$0")/conf/_load.sh"
 
-# Run from the per-image data dir so ./log* and ./output/ land under $ORCA_DATA.
+# Run from the experiment data dir so ./log* and ./output/ land under $ORCA_DATA.
 cd "$ORCA_DATA"
 
 echo ">> filter_instance: ${FILTER_INSTANCE:-.*}  max_retry: $MAX_RETRY"
