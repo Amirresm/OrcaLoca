@@ -2,6 +2,7 @@
 
 import asyncio
 import json
+import os
 import sys
 import time
 import traceback
@@ -84,7 +85,14 @@ class TokenCounter:
     def __init__(self, llm: LLM) -> None:
         model = llm.metadata.model_name
         if isinstance(llm, OpenAI):
-            self.encoding = tiktoken.encoding_for_model(model)
+            try:
+                self.encoding = tiktoken.encoding_for_model(model)
+            except KeyError:
+                # Self-hosted / unknown models (e.g. vLLM served as OpenAILike)
+                # aren't in tiktoken's model map. Fall back to an explicit
+                # encoding; counts are approximate vs. the model's real tokenizer.
+                encoding_name = os.environ.get("TIKTOKEN_ENCODING", "cl100k_base")
+                self.encoding = tiktoken.get_encoding(encoding_name)
         elif isinstance(llm, Anthropic):
             self.encoding = llm.tokenizer
         elif isinstance(llm, Vertex):

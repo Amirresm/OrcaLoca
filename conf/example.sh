@@ -26,6 +26,11 @@ export OPENAI_API_BASE_URL="http://localhost:8001/v1"   # <-- change port per mo
 export OPENAI_API_KEY="dummy"                            # vLLM ignores this unless started with --api-key
 export VLLM_CONTEXT_WINDOW="32768"                       # your model's max context length
 
+# tiktoken can't map a custom model name to a tokenizer, so token counts use this
+# encoding as a fallback (approximate vs. your model's real tokenizer). cl100k_base
+# is fine for most; o200k_base matches GPT-4o-era models.
+export TIKTOKEN_ENCODING="cl100k_base"
+
 # ---- Dataset --------------------------------------------------------------
 export DATASET="princeton-nlp/SWE-bench_Lite"
 export SPLIT="test"
