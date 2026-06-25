@@ -64,6 +64,7 @@ def parse_inputs() -> argparse.Namespace:
     parser.add_argument(
         "-r",
         "--max_retry",
+        type=int,
         default=default_args_dict["max_retry"],
         help=f"The max retry",
     )
